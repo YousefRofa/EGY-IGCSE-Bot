@@ -4,7 +4,7 @@ from nextcord.utils import get
 from server_functions import isModerator, hasRole_id, isfat7i, is_banned
 from server_bases import rules_msg, server_roles_msg, server_roles_buttons, case_msg, warn_msg,\
     server_rules, session_roles_buttons, session_roles_msg, subject_roles_msgs, subject_roles_buttons
-from server_data import server_channels, server_roles_data, server_voice_channels
+from server_data import server_channels, server_roles_data
 import datetime, time
 # import requests
 import os
