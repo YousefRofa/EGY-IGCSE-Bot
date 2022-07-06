@@ -6,17 +6,17 @@ from server_bases import rules_msg, server_roles_msg, server_roles_buttons, case
     server_rules, session_roles_buttons, session_roles_msg, subject_roles_msgs, subject_roles_buttons
 from server_data import server_channels, server_roles_data
 import datetime, time
-# import requests
+import requests
 import os
-# from pytesseract import pytesseract
-# import shutil
+from pytesseract import pytesseract
+import shutil
 
 
 TOKEN = os.environ.get("TOKEN")
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
 GUILD_ID = 967997831690465290
-# path_to_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+path_to_tesseract = r"./.apt/usr/share/tesseract-ocr/4.00/tessdata"
 
 # Events on starting the bot
 
@@ -386,36 +386,36 @@ async def on_message(message):
                 await user.send(file=await attachment.to_file())
             return
 
-    # if message.content.lower().startswith("findpaper"):
-    #     if len(message.attachments) != 0:
-    #         response = requests.get(message.attachments[0].url, stream=True)
-    #         with open('img.png', 'wb') as outfile:
-    #             shutil.copyfileobj(response.raw, outfile)
-    #         pytesseract.tesseract_cmd = path_to_tesseract
-    #         context = pytesseract.image_to_string('img.png')
-    #     else:
-    #         context_list: list = message.content.split()[1:]
-    #         context = ' '.join(context_list)
-    #     response = requests.get(f"https://paper.sc/search/?as=json&query={context}").json()
-    #     if len(response['list']) == 0:
-    #         await message.reply("No results found in past papers. Try changing your query for better results.")
-    #     else:
-    #         embed = discord.Embed(title="Potential Match",
-    #                               description="Found a question paper matching your question!",
-    #                               colour=discord.Colour.blurple())
-    #         for number, item in enumerate(response['list']):
-    #             if not len(item['related']) == 0:
-    #                 embed.add_field(name="Subject", value=item['doc']['subject'], inline=True)
-    #                 embed.add_field(name="Paper", value=item['doc']['paper'], inline=True)
-    #                 embed.add_field(name="Session", value=item['doc']['time'], inline=True)
-    #                 embed.add_field(name="Variant", value=item['doc']['variant'], inline=True)
-    #                 embed.add_field(name="QP Link", value=f"https://paper.sc/doc/{item['doc']['_id']}", inline=True)
-    #                 embed.add_field(name="MS Link", value=f"https://paper.sc/doc/{item['related'][0]['_id']}",
-    #                             inline=True)
-    #                 if number == 2:
-    #                     await message.reply(embed=embed)
-    #                     return
-    #         await message.reply(embed=embed)
+    if message.content.lower().startswith("findpaper"):
+        if len(message.attachments) != 0:
+            response = requests.get(message.attachments[0].url, stream=True)
+            with open('img.png', 'wb') as outfile:
+                shutil.copyfileobj(response.raw, outfile)
+            pytesseract.tesseract_cmd = path_to_tesseract
+            context = pytesseract.image_to_string('img.png')
+        else:
+            context_list: list = message.content.split()[1:]
+            context = ' '.join(context_list)
+        response = requests.get(f"https://paper.sc/search/?as=json&query={context}").json()
+        if len(response['list']) == 0:
+            await message.reply("No results found in past papers. Try changing your query for better results.")
+        else:
+            embed = discord.Embed(title="Potential Match",
+                                  description="Found a question paper matching your question!",
+                                  colour=discord.Colour.blurple())
+            for number, item in enumerate(response['list']):
+                if not len(item['related']) == 0:
+                    embed.add_field(name="Subject", value=item['doc']['subject'], inline=True)
+                    embed.add_field(name="Paper", value=item['doc']['paper'], inline=True)
+                    embed.add_field(name="Session", value=item['doc']['time'], inline=True)
+                    embed.add_field(name="Variant", value=item['doc']['variant'], inline=True)
+                    embed.add_field(name="QP Link", value=f"https://paper.sc/doc/{item['doc']['_id']}", inline=True)
+                    embed.add_field(name="MS Link", value=f"https://paper.sc/doc/{item['related'][0]['_id']}",
+                                inline=True)
+                    if number == 2:
+                        await message.reply(embed=embed)
+                        return
+            await message.reply(embed=embed)
 
 
 @bot.event
