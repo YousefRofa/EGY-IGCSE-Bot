@@ -10,6 +10,8 @@ import requests
 import os
 from pytesseract import pytesseract
 import shutil
+import io
+from PIL import Image
 
 
 TOKEN = os.environ.get("TOKEN")
@@ -389,10 +391,8 @@ async def on_message(message):
     if message.content.lower().startswith("findpaper"):
         if len(message.attachments) != 0:
             response = requests.get(message.attachments[0].url, stream=True)
-            with open('img.png', 'wb') as outfile:
-                shutil.copyfileobj(response.raw, outfile)
-            pytesseract.tesseract_cmd = path_to_tesseract
-            context = pytesseract.image_to_string('img.png')
+            img = Image.open(io.BytesIO(response.content))
+            context = pytesseract.image_to_string(img).replace("\n", " ").replace("  ", "").replace("  ", "")
         else:
             context_list: list = message.content.split()[1:]
             context = ' '.join(context_list)
