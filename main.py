@@ -3,13 +3,12 @@ from nextcord.ext import commands
 from nextcord.utils import get
 from server_functions import isModerator, hasRole_id, isfat7i, is_banned
 from server_bases import rules_msg, server_roles_msg, server_roles_buttons, case_msg, warn_msg,\
-    server_rules, session_roles_buttons, session_roles_msg, subject_roles_msgs, subject_roles_buttons
+    server_rules, session_roles_buttons, session_roles_msg, subject_roles_msgs, subject_roles_buttons, welcome_msg
 from server_data import server_channels, server_roles_data
 import datetime, time
 import requests
 import os
 from pytesseract import pytesseract
-import shutil
 import io
 from PIL import Image
 
@@ -42,6 +41,11 @@ async def on_ready():
     await set_roles()
     print("Bot ready as {0.user}".format(bot))
 
+
+@bot.event
+async def on_member_join(member):
+    channel = await member.create_dm()
+    await channel.send(embeds=welcome_msg)
 
 # Moderators actions
 
@@ -349,7 +353,6 @@ async def delete(interaction: discord.Interaction,
     for m in fetchMessage:
         await m.delete()
     await interaction.send("Deleted my messages :(", ephemeral=True)
-
 
 # Actions when a message is sent
 

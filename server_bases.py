@@ -98,6 +98,24 @@ subject_roles_msgs = {
         description='**1** : Computer Science\n**2** : ICT\n'),
 }
 
+welcome_msg = [discord.Embed(title="**سلام عليكم ورحمة الله وبركاتوووووو**",
+        description="Al Salam Alaikum w ra7amt Allah w barakato - Mesa Mesa 3leko ya agd3 el so7ab."
+                                        "\nWelcome to EGY-IGCSE. 5watak fy Allah w fel IGCSE").set_image("https://media.giphy.com/media/lJJtzOQJMnPmE3EjNc/giphy.gif"),
+              discord.Embed(description="Bos yabny w ya benty, mafe4 7d yenkr en el yom ely d5lna feh el IG kan aktr 7aga nadmaneen 3leha, "
+                                        "w ba2ena kolena ma4yeen 3al 7etan. Bs al 7amdulilah rabena satar.\n"
+                                        "El kalam kal 2aty, mfe4 a7san lel masry mn a5oh el masry- w 3omrena ma nensa 7abayebna el ely fel 5aleeg "
+                                        "-w gomhoreyet el IG kolaha 4ahedat 3la past papers tho3baneya w manaheg 8er ba4areya w ayam soda zy sawad 3yon Abo Nanci."),
+              discord.Embed(title="**خدمات الزعامة**",
+                  description="Akeed enta hates2al nfsk, 'y3ny asebny mn el hunood 3al youtube w ad5ol hena leh, ana mostafeed eh'\n"
+                                        "Esm3 b2a yabn 3amy el 4o8l el gamed ely 3mk Adel Shakal hywfrholak"),
+              discord.Embed(title="Kol mwad IG hna",
+                  description="Ay mada 3ndk, swa2 chemistry, biology wla enta mn bto3 'ques quel ya la buini' e7na mawgooden w hnwafarlak kol egabat as2eltak f kol el mawad"),
+              discord.Embed(title="Ngblk markscheme 2y so2al l7d 3andak",
+                  description="Tb3n e7na yama zhe2na mn PMT w GCE Guide w Save My Exams. F El Z3ama gablak mn el a5er."
+                                        " Erz3 screenshot el so2al f 2y channel w m3aha el command w 3mk hygeblak el markscheme l7ad 3andak").set_image("https://i.im.ge/2022/07/12/u48xTG.png"),
+              discord.Embed(description="W tab3an b2a, mab2a4 ebn balady lw ma2oltelak4 en e7na agd3 nas, el mohem enta t3ala bs w e7na hno2af f dahrak w nesandak.\n"
+                                        "W lw 3ndk ay 7aga, hezely wa7da DM hna w ana bnafsy ***El Z3ama*** **Adel Shakal** hawasal el resala l el Mods f asr3 wa2t \n"
+                                        "W 3la kalam el 4a3er  *'لو قلبك جايبك, تعالى و هات حبايابك.'*")]
 
 def warn_msg(moderator, reason):
     msg = f"""Hello,
