@@ -1,4 +1,4 @@
 nextcord
 requests
 pytesseract
-pymongo
+pymongo[srv]
