@@ -354,6 +354,40 @@ async def delete(interaction: discord.Interaction,
         await m.delete()
     await interaction.send("Deleted my messages :(", ephemeral=True)
 
+
+@bot.slash_command(description='Find the past paper with the mark scheme')
+async def findpaper(interaction: discord.Interaction,
+                    query: str = discord.SlashOption(name="query", description="Search query", required=False),
+                    img: discord.Attachment = discord.SlashOption(name="image",
+                                                                     description="Image to find the paper of",
+                                                                     required=False)):
+    if img:
+        response = requests.get(img.url, stream=True)
+        img = Image.open(io.BytesIO(response.content))
+        context = pytesseract.image_to_string(img).replace("\n", " ").replace("  ", "").replace("  ", "")
+    else:
+        context = ' '.join(query)
+    response = requests.get(f"https://paper.sc/search/?as=json&query={context}").json()
+    if len(response['list']) == 0:
+        await interaction.send("No results found in past papers. Try changing your query for better results.")
+    else:
+        embed = discord.Embed(title="Potential Match",
+                              description="Found a question paper matching your question!",
+                              colour=discord.Colour.blurple())
+        for number, item in enumerate(response['list']):
+            if not len(item['related']) == 0:
+                embed.add_field(name="Subject", value=item['doc']['subject'], inline=True)
+                embed.add_field(name="Paper", value=item['doc']['paper'], inline=True)
+                embed.add_field(name="Session", value=item['doc']['time'], inline=True)
+                embed.add_field(name="Variant", value=item['doc']['variant'], inline=True)
+                embed.add_field(name="QP Link", value=f"https://paper.sc/doc/{item['doc']['_id']}", inline=True)
+                embed.add_field(name="MS Link", value=f"https://paper.sc/doc/{item['related'][0]['_id']}",
+                                inline=True)
+                if number == 2:
+                    await interaction.send(embed=embed)
+                    return
+        await interaction.send(embed=embed)
+
 # Actions when a message is sent
 
 
@@ -390,35 +424,6 @@ async def on_message(message):
             for attachment in message.attachments:
                 await user.send(file=await attachment.to_file())
             return
-
-    if message.content.lower().startswith("findpaper"):
-        if len(message.attachments) != 0:
-            response = requests.get(message.attachments[0].url, stream=True)
-            img = Image.open(io.BytesIO(response.content))
-            context = pytesseract.image_to_string(img).replace("\n", " ").replace("  ", "").replace("  ", "")
-        else:
-            context_list: list = message.content.split()[1:]
-            context = ' '.join(context_list)
-        response = requests.get(f"https://paper.sc/search/?as=json&query={context}").json()
-        if len(response['list']) == 0:
-            await message.reply("No results found in past papers. Try changing your query for better results.")
-        else:
-            embed = discord.Embed(title="Potential Match",
-                                  description="Found a question paper matching your question!",
-                                  colour=discord.Colour.blurple())
-            for number, item in enumerate(response['list']):
-                if not len(item['related']) == 0:
-                    embed.add_field(name="Subject", value=item['doc']['subject'], inline=True)
-                    embed.add_field(name="Paper", value=item['doc']['paper'], inline=True)
-                    embed.add_field(name="Session", value=item['doc']['time'], inline=True)
-                    embed.add_field(name="Variant", value=item['doc']['variant'], inline=True)
-                    embed.add_field(name="QP Link", value=f"https://paper.sc/doc/{item['doc']['_id']}", inline=True)
-                    embed.add_field(name="MS Link", value=f"https://paper.sc/doc/{item['related'][0]['_id']}",
-                                inline=True)
-                    if number == 2:
-                        await message.reply(embed=embed)
-                        return
-            await message.reply(embed=embed)
 
 
 @bot.event
