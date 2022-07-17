@@ -3,8 +3,9 @@ from nextcord.ext import commands
 from nextcord.utils import get
 from server_functions import isModerator, hasRole_id, isfat7i, is_banned
 from server_bases import rules_msg, server_roles_msg, server_roles_buttons, case_msg, warn_msg,\
-    server_rules, session_roles_buttons, session_roles_msg, subject_roles_msgs, subject_roles_buttons, welcome_msg
+    server_rules, session_roles_buttons, session_roles_msg, subject_roles_msgs, subject_roles_buttons, welcome_msg, warning_details
 from server_data import server_channels, server_roles_data
+import pymongo
 import datetime, time
 import requests
 import os
@@ -14,10 +15,14 @@ from PIL import Image
 
 
 TOKEN = os.environ.get("TOKEN")
+MONGODB_LINK =  'mongodb+srv://Yousefrofa:Nodanaro842006@egy-igcse-bot.orccawa.mongodb.net/?retryWrites=true&w=majority'  # os.environ.get("MONGODB_LINK")
+path_to_tesseract = r"./.apt/usr/share/tesseract-ocr/4.00/tessdata"
+
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
+cluster = pymongo.MongoClient(MONGODB_LINK)
+
 GUILD_ID = 967997831690465290
-path_to_tesseract = r"./.apt/usr/share/tesseract-ocr/4.00/tessdata"
 
 # Events on starting the bot
 
@@ -71,6 +76,15 @@ async def mute(interaction: discord.Interaction,
             await interaction.send("3ayz t3mli ana mute?? :(", ephemeral=True)
             return
         await interaction.response.defer()
+
+        db = cluster['Behavior']
+        if not user.name in db.list_collection_names():
+            db.create_collection(f'{user.name}#{user.discriminator}')
+        collection = db[f'{user.name}#{user.discriminator}']
+
+        collection.insert_one({'Date': datetime.datetime.utcnow(), 'Case': 'Mute', 'Reason': reason,
+                               'Moderator': f'{interaction.user.name}#{interaction.user.discriminator}'})
+
         await user.add_roles(mute_role)
         log_channel = bot.get_channel(server_channels['server_info_moderators-actions'])
         last_ban_msg = await log_channel.history(limit=1).flatten()
@@ -123,6 +137,15 @@ async def kick(interaction: discord.Interaction,
             await interaction.send("3ayz t3mly ana kick?? :(", ephemeral=True)
             return
         await interaction.response.defer()
+
+        db = cluster['Behavior']
+        if not user.name in db.list_collection_names():
+            db.create_collection(f'{user.name}#{user.discriminator}')
+        collection = db[f'{user.name}#{user.discriminator}']
+
+        collection.insert_one({'Date': datetime.datetime.utcnow(), 'Case': 'Kick', 'Reason': reason,
+                               'Moderator': f'{interaction.user.name}#{interaction.user.discriminator}'})
+
         log_channel = bot.get_channel(server_channels['server_info_moderators-actions'])
         last_ban_msg = await log_channel.history(limit=1).flatten()
         case_no = int(last_ban_msg[0].embeds[0].title.split()[1][1:])+1
@@ -148,6 +171,15 @@ async def timeout(interaction: discord.Interaction,
         await interaction.send(f"You cant timeout a mod yasta", ephemeral=True)
         return
     await interaction.response.defer()
+
+    db = cluster['Behavior']
+    if not user.name in db.list_collection_names():
+        db.create_collection(f'{user.name}#{user.discriminator}')
+    collection = db[f'{user.name}#{user.discriminator}']
+
+    collection.insert_one({'Date': datetime.datetime.utcnow(), 'Case': 'Timeout', 'Reason': reason,
+                           'Moderator': f'{interaction.user.name}#{interaction.user.discriminator}'})
+
     seconds = 0
     if "d" in time_:
         seconds += int(time_.split("d")[0]) * 86400
@@ -217,6 +249,15 @@ async def ban(interaction: discord.Interaction,
             await interaction.send("3ayz t3mly ana ban?? :(", ephemeral=True)
             return
         await interaction.response.defer()
+
+        db = cluster['Behavior']
+        if not user.name in db.list_collection_names():
+            db.create_collection(f'{user.name}#{user.discriminator}')
+        collection = db[f'{user.name}#{user.discriminator}']
+
+        collection.insert_one({'Date': datetime.datetime.utcnow(), 'Case': 'Ban', 'Reason': reason,
+                               'Moderator': f'{interaction.user.name}#{interaction.user.discriminator}'})
+
         log_channel = bot.get_channel(server_channels['server_info_moderators-actions'])
         last_ban_msg = await log_channel.history(limit=1).flatten()
         case_no = int(last_ban_msg[0].embeds[0].title.split()[1][1:])+1
@@ -267,11 +308,40 @@ async def warn(interaction: discord.Interaction,
         if isfat7i(user):
             await interaction.send("3ayz t3mly ana warn?? :(", ephemeral=True)
             return
+
+        db = cluster['Behavior']
+        if not f'{user.name}#{user.discriminator}' in db.list_collection_names():
+            db.create_collection(f'{user.name}#{user.discriminator}')
+        collection = db[f'{user.name}#{user.discriminator}']
+
+        collection.insert_one({'Date': datetime.datetime.utcnow(), 'Case': 'Warn', 'Reason': reason, 'Moderator': f'{interaction.user.name}#{interaction.user.discriminator}'})
+
+        warnings_channel = bot.get_channel(server_channels['moderation_warnings'])
+        await warnings_channel.send(embed=warning_details(interaction.user, user, reason, datetime.datetime.utcnow()))
+
         await user.send(warn_msg(interaction.user, reason))
-        await interaction.send("Warned them 5las, 2y 5dma yabaa")
+        await interaction.send("Warned them 5las, 2y 5dma yabaa", ephemeral=True)
     else:
         await interaction.send(f"You are not a mod :P", ephemeral=True)
 
+
+@bot.slash_command(description="Show user past history (mods only)")
+async def history(interaction: discord.Interaction,
+               user: discord.Member =
+                    discord.SlashOption(name="member",
+                                        description="User you to unban", required=True)):
+    if isModerator(interaction.user):
+        db = cluster['Behavior']
+        if not f'{user.name}#{user.discriminator}' in db.list_collection_names():
+            await interaction.send("User has no previous history.")
+            return
+        collection = db[f'{user.name}#{user.discriminator}']
+        message = f'```{user} History\n\n'
+        for activity in collection.find():
+            message += f'Case : {activity["Case"]}\nReason : {activity["Reason"]}\nModerator : {activity["Moderator"]}\nDate : {activity["Date"]}\n\n'
+        await interaction.send(message+'```')
+    else:
+        await interaction.send(f"You are not a mod :P", ephemeral=True)
 
 # Commands
 
@@ -365,8 +435,11 @@ async def findpaper(interaction: discord.Interaction,
         response = requests.get(img.url, stream=True)
         img = Image.open(io.BytesIO(response.content))
         context = pytesseract.image_to_string(img).replace("\n", " ").replace("  ", "").replace("  ", "")
-    else:
+    elif query:
         context = ' '.join(query)
+    else:
+        await interaction.send('You have to set either a query or an image', ephemeral=True)
+        return
     response = requests.get(f"https://paper.sc/search/?as=json&query={context}").json()
     if len(response['list']) == 0:
         await interaction.send("No results found in past papers. Try changing your query for better results.")

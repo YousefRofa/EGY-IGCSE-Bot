@@ -1,6 +1,7 @@
 server_channels = {
     'moderation_mod-mail': 991111223083024514,
     'moderation_error-handler': 993020370024157234,
+    'moderation_warnings': 998340274801614898,
     'roles_server-roles': 991217902843871324,
     'roles_session-roles': 991458201541292092,
     'roles_subjects-roles': 991217938105385061,

@@ -117,6 +117,7 @@ welcome_msg = [discord.Embed(title="**سلام عليكم ورحمة الله و
                                         "W lw 3ndk ay 7aga, hezely wa7da DM hna w ana bnafsy ***El Z3ama*** **Adel Shakal** hawasal el resala l el Mods f asr3 wa2t \n"
                                         "W 3la kalam el 4a3er  *'لو قلبك جايبك, تعالى و هات حبايابك.'*")]
 
+
 def warn_msg(moderator, reason):
     msg = f"""Hello,
     You have been warned in EGY-IGCSE for  '{reason}'
@@ -136,6 +137,14 @@ def case_msg(case_type, case_no, user, mod, reason=None, duration=None, time=Non
     if time:
         embed.add_field(name="Duration:", value=duration, inline=False)
         embed.add_field(name="Until:", value=time, inline=False)
+    return embed
+
+
+def warning_details(user, mod, reason, time):
+    embed = discord.Embed(colour=discord.Colour.dark_red(), title=f'{user.name}#{user.discriminator} warned')
+    embed.add_field(name="Moderator: ", value=mod.mention, inline=False)
+    embed.add_field(name="Reason: ", value=reason, inline=False)
+    embed.add_field(name="Time: ", value=time, inline=False)
     return embed
 
 
